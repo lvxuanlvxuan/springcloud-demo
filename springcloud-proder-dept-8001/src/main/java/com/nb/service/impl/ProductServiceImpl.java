@@ -25,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getOne(Integer id, BigDecimal sales) {
+        System.out.println("11");
         Product product = productMapper.getOne(id);
         return product;
     }
