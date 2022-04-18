@@ -6,6 +6,7 @@ mybatis:
   type-aliases-package: com.nb.pojo
   config-location: classpath:mybatis/mybatis-config.xml
   mapper-locations: classpath:mybatis/mapper/*.xml
+  type-handlers-package: com.nb.handler.enumTypeHandler
 #  configuration:
 #    map-underscore-to-camel-case: on
 

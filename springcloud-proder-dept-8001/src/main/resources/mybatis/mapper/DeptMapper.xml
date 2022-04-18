@@ -3,16 +3,16 @@
         PUBLIC "-//mybatis.org//DTO Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nb.mapper.DeptMapper">
     
-    <insert id="addDept" parameterType="Dept">
+    <insert id="addDept" parameterType="com.nb.pojo.Dept">
         insert into dept (dept_name,dept_source)
         values (#{dept_name},DATABASE())
     </insert>
     
-    <select id="queryById" parameterType="Long" resultType="Dept">
+    <select id="queryById" parameterType="Long" resultType="com.nb.pojo.Dept">
         select * from dept where dept_no=#{deptNo}
     </select>
 
-    <select id="queryAll" resultType="Dept">
+    <select id="queryAll" resultType="com.nb.pojo.Dept">
         select * from dept
     </select>
 

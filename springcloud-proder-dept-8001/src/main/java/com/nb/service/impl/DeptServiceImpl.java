@@ -26,10 +26,13 @@ public class DeptServiceImpl implements DeptService {
     }
 
     public Dept queryById(Long deptNo) {
-        return deptMapper.queryById(deptNo);
+        Dept dept=deptMapper.queryById(deptNo);
+        return dept;
     }
 
     public List<Dept> queryAll() {
-        return deptMapper.queryAll();
+        List<Dept> depts = deptMapper.queryAll();
+
+        return depts;
     }
 }

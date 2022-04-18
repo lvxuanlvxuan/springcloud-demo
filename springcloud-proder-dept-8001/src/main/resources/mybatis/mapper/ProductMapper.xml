@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTO Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nb.mapper.ProductMapper">
+
+    <resultMap id="productMap" type="com.nb.pojo.Product">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="product_name" jdbcType="VARCHAR" property="productName"/>
+        <result column="product_status" jdbcType="INTEGER" property="productStatus"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <collection property="details" ofType="com.nb.pojo.ProductDetail">
+            <result column="did" jdbcType="INTEGER" property="id"/>
+            <result column="image" jdbcType="VARCHAR" property="image"/>
+            <result column="doc" jdbcType="VARCHAR" property="doc"/>
+        </collection>
+    </resultMap>
+
+    <select id="findProductInfo" parameterType="com.nb.VO.ProductVO" resultMap="productMap">
+        select p.id as id,p.product_name as product_name,
+        p.product_status as product_status,p.create_time as create_time,
+        d.id as did,d.image as image,d.doc as doc
+        from product p
+        left join product_detail d on p.id=d.product_id
+        where p.id=#{id}
+        <if test="status!=null">
+            and p.product_status=#{status}
+        </if>
+    </select>
+
+    <select id="rangeQuery" parameterType="java.util.List" resultType="com.nb.pojo.Product">
+        select * from product where id in
+        <foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getOne" parameterType="java.lang.Integer" resultType="com.nb.pojo.Product">
+        select * from product where
+        1=1
+            and id=#{id}
+    </select>
+
+    <insert id="saveOneProduct" parameterType="com.nb.pojo.Product">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select LAST_INSERT_ID()
+        </selectKey>
+
+        insert into product (product_name,product_status,create_time)
+        values (#{productName},#{productStatus},#{createTime})
+    </insert>
+
+    <insert id="saveBatchProduct" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        insert into product (product_name,product_status,create_time)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <choose>
+                    <when test="item.productName!=null">
+                        #{item.productName},
+                    </when>
+                    <otherwise>
+                        "",
+                    </otherwise>
+                </choose>
+                <choose>
+                    <when test="item.productStatus!=null">
+                        #{item.productStatus},
+                    </when>
+                    <otherwise>
+                        0,
+                    </otherwise>
+                </choose>
+                #{item.createTime},
+            </trim>
+        </foreach>
+    </insert>
+
+    <update id="batchUpdateProductV1" parameterType="java.util.List">
+        update product
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="product_name=case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    <choose>
+                        <when test="item.productName!=null">
+                            when id=#{item.id} then #{item.productName}
+                        </when>
+                        <otherwise>
+                            when id=#{item.id} then product.product_name
+                        </otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+            <trim prefix="product_status=case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    <choose>
+                        <when test="item.productStatus!=null">
+                            when id=#{item.id} then #{item.productStatus}
+                        </when>
+                        <otherwise>
+                            when id=#{item.id} then product.product_status
+                        </otherwise>
+                    </choose>
+                </foreach>
+            </trim>
+            <trim prefix="create_time=case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id=#{item.id} then now()
+                </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateProductV2" parameterType="java.util.List">
+        <if test="list!=null and list.size()>0">
+            <foreach collection="list" index="index" item="item" separator=";">
+                update product
+                set create_time=now()
+                <if test="item.productName!=null">
+                    ,product_name=#{item.productName}
+                </if>
+                <if test="item.productStatus!=null">
+                    ,product_status=#{item.productStatus}
+                </if>
+                where id=#{item.id}
+            </foreach>
+        </if>
+    </update>
+</mapper>
